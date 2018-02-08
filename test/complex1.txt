@@ -1,0 +1,15 @@
+{
+  "mob": {
+    "method": ["visual", "sound"],
+    "timestamp": "2014-04-10T08:33:53Z",
+    "state": "emergency",
+    "message": "Man Overboard!",
+    "$source": "x.y.z"
+  },
+  "navigation": {
+    "gnss": {...},
+    "anchor": {
+      "currentRadius": {...}
+    }
+  }
+}
