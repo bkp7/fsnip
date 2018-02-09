@@ -22,15 +22,11 @@ if (args.length === 3 && args[2] === '--help') {
   console.info('fsnip is a tool for extracting json snippets from json files.\n\n' +
                'Usage:\n' + '' +
                'TODO still \n' +
-               '  node mdInsert file                  process the file and output the result to the console\n' +
-               '  node mdInsert source destination    process all files in source placing resulting files into destination\n' +
-               '  node mdInsert mdCommandString       process mdCommandString amd output the result to the console\n\n' +
-               '  file         Specifies the file to process.\n' +
-               '  source       Specifies an existing folder containing files to process (subfolders will be included)\n' +
-               '  destination  Specifies a folder where processed files will be placed\n' +
-               '                 WARNING: any files already in destination will be deleted\n' +
-               '  mdCommand    specifies a command string in [] followed by file details in ()\n' +
-               '                 eg. [mdInsert -josnSnippet $..source][(./demo.json)')
+               '  fsnip FILE [options [arguments]]    process the file and output the result to the console\n' +
+               '  FILE         Specifies the file to process.\n' +
+               '  --ellipsify  replaces the passed object with ellipses (...)\n' +
+               '                 but excludes any keys which follow prepended by !\n' +
+               '                 eg. fsnip myfile.json --ellipsify $..address !postcode')
 } else if (args.length >= 3) {
   try {
     var txt = fs.readFileSync(args[2]).toString()
@@ -38,21 +34,23 @@ if (args.length === 3 && args[2] === '--help') {
     console.error(chalk.red("unable to read file '" + args[2] + "'"))
   }
   let arg = stringifyArray(args, 3, args.length, ' ')
-  console.log(mdInsert(arg, txt))
+  console.log(fsnipDo(arg, txt))
 } else { // we couldn't recognise the format on the command line
   console.error(chalk.red('Unrecognised arguments passed to fsnip. See node fsnip --help'))
 }
 
-function mdInsert (cmdOptsString, inputText) {
-  // run the mdInsert Command processing any options and arguments againt input text and return the resultant modified text
-  // cmdOptsString eg. '-jsonEllipsify navigation vessels -somethingelse "arg 1"'
+function fsnipDo (cmdOptsString, inputText) {
+  // does the processing of the fsnip command
   // inputText is the text we want to modify
   let cmdOpts = split(cmdOptsString)
   if (cmdOpts === null || cmdOpts.length === 0) { return inputText } // no processing required as no options passed in
   var src = { // a temporary structure containing the text we are working on its type eg. 'json' (which is set later)
     text: inputText,
     type: '',
-    json: null
+    outputOptions: {},
+    error: [],
+    json: null,
+    plain: null
   }
 
   // now we are going to parse through the options and arguments to extract individual options together with their arguments
@@ -60,23 +58,26 @@ function mdInsert (cmdOptsString, inputText) {
   var cmdArgs = [] // array containing any arguments for the cmdOpt
   for (var i = 0; i < cmdOpts.length; i++) {
     if (!cmdOpts[i].match(/^\s+$/) && !(cmdOpts[i] === '')) { // only process the option if it is not zero length or whitespace
-      if (cmdOpts[i].substr(0, 1) === '-') { // this is a new option eg. -jsonEllipsify
+      if (cmdOpts[i].substr(0, 2) === '--') { // this is a new option eg. -jsonEllipsify
         if (cmdOpt !== '') runOption(cmdOpt, cmdArgs, src) // process/run any previous Option we found
         cmdOpt = cmdOpts[i] // store the new option we have found
         cmdArgs = [] // reset ready for any new arguments
       } else {
         // this must be an argument for the current option
         if (cmdOpt === '') { // error if we don't currently have an option
-          throw new Error('invalid argument ' + i + " '" + cmdOpts[i] + "' in '" + cmdOptsString + "' passed without valid option to mdInsert")
+          src.error.push('invalid argument ' + i + " '" + cmdOpts[i] + "' in '" + cmdOptsString + "' passed without valid option to fsnip")
         }
         cmdArgs.push(cmdOpts[i])
       }
     }
   }
   if (cmdOpt !== '') runOption(cmdOpt, cmdArgs, src) // process/run the very last Option we found
-
   postProcess(src)
-  return src.text
+  if (src.error.length === 0) {
+    return src.text
+  } else {
+    return chalk.red(src.error)
+  }
 }
 
 function split (inputText) {
@@ -138,28 +139,45 @@ function runOption (option, args, inpObj) {
   if (option === '--json') {
     json(inpObj, args)
   } else if (option === '--prettify') {
-    json(inpObj, args)
+    jsonPrettify(inpObj, args)
   } else if (option === '--ellipsify') {
     jsonEllipsify(inpObj, args)
   } else if (option === '--snip') {
     jsonSnippet(inpObj, args)
   } else if (option === '--delKeys') {
     jsonDelKeys(inpObj, args)
+  } else if (option === '--from') {
+    textFrom(inpObj, args, false)
+  } else if (option === '--start') {
+    textFrom(inpObj, args, true)
+  } else if (option === '--to') {
+    textTo(inpObj, args, false)
+  } else if (option === '--finish') {
+    textTo(inpObj, args, true)
   } else {
-    console.error(chalk.red("invalid option '" + option + "' for fsnip"))
+    inpObj.error.push("invalid option '" + option + "' for fsnip")
   }
 }
 
 function postProcess (inpObj) {
   // does any post process tidying up
   if (inpObj.type === 'json') {
-    // inpObj.text = JSON.stringify(inpObj.json, null, 2);  // prettify the json with 2 space indent
-    inpObj.text = stringify(inpObj.json, {maxLength: 45})  // prettify the json with 2 space indent
+    // stringify as required
+    let opts = inpObj.outputOptions
+    if (opts.maxLength === 'infinity' && opts.margins === false) {
+      inpObj.text = JSON.stringify(inpObj.json)
+    } else if (opts.maxLength === 0 && opts.margins === false) {
+      inpObj.text = JSON.stringify(inpObj.json, null, opts.indent)
+    } else {
+      inpObj.text = stringify(inpObj.json, opts)
+    }
     // now replace any placeholders. The placeholders are valid JSON but what we replace them with may not be valid JSON
-    inpObj.text = inpObj.text.replace(/\[\s*"skPlaceholderArrEllipses"\s*\]/g, '[...]')
-    inpObj.text = inpObj.text.replace(/\{\s*"skPlaceholderObj"\s*:\s*"Ellipses"\s*\}/g, '{...}') // do this separately to the one below so that if the object is empty it appears all on one line
-    inpObj.text = inpObj.text.replace(/"skPlaceholderObj"\s*:\s*"Ellipses"/g, '...')
-    inpObj.text = inpObj.text.replace(/"skPlaceholderStrEllipses"/g, '"..."')
+    inpObj.text = inpObj.text.replace(/\[\s*"fsnipPlaceholderArrEllipses"\s*\]/g, '[...]')
+    inpObj.text = inpObj.text.replace(/\{\s*"fsnipPlaceholderObj"\s*:\s*"Ellipses"\s*\}/g, '{...}') // do this separately to the one below so that if the object is empty it appears all on one line
+    inpObj.text = inpObj.text.replace(/"fsnipPlaceholderObj"\s*:\s*"Ellipses"/g, '...')
+    inpObj.text = inpObj.text.replace(/"fsnipPlaceholderStrEllipses"/g, '"..."')
+  } else if (inpObj.type === 'plain') {
+    inpObj.text = inpObj.plain.trim()
   }
 }
 
@@ -168,9 +186,16 @@ function setInputType (inpObj, newType) {
     inpObj.type = newType
     if (newType === 'json') {
       inpObj.json = JSON.parse(inpObj.text)
+      jsonPrettify(inpObj) // sets default output options for json
+    } else if (newType === 'plain') {
+      inpObj.plain = inpObj.text
     }
-  } else if (inpObj.type !== newType) { // it's alreay been set to something else so there's a problem
-    throw new Error('cannot mix options designed to process different types')
+    return true
+  } else if (inpObj.type !== newType) { // it's already been set to something else so there's a problem
+    inpObj.error.push('cannot mix options designed to process different types of file')
+    return false
+  } else {
+    return true
   }
 }
 
@@ -189,34 +214,54 @@ function json (inpObj, cmdArgs) {
   setInputType(inpObj, 'json') // all we do is flag our content as being json
 }
 
+// =================jsonPrettify=======================
+function jsonPrettify (inpObj, cmdArgs) {
+  // cmdArgs is an (optional) array of arguments being indent, maxLength, margins
+  // they are all passed as strings so need to be converted to numbers where appropriate
+  // we use - 0 to convert string numbers to numeric and === against itself to check for NaN
+  if (setInputType(inpObj, 'json')) {
+    let opts = inpObj.outputOptions
+    // set defaults
+    opts.margins = false
+    opts.maxLength = 45
+    opts.indent = 2
+    // overwrite with any values passed in
+    if (cmdArgs !== undefined) {
+      if ((cmdArgs[0] - 0) === (cmdArgs[0] - 0)) { opts.indent = (cmdArgs[0] - 0) }
+      if ((cmdArgs[1] - 0) === (cmdArgs[1] - 0)) { opts.maxLength = (cmdArgs[1] - 0) }
+      if (cmdArgs[1] === 'infinity') { opts.maxLength = 'infinity' }
+      opts.margins = (cmdArgs[2] === 'true') // defaults to false if margins anything other than true
+    }
+  }
+}
+
 // =================ellipsify==========================
 function jsonEllipsify (inpObj, cmdArgs) {
   // cmdArgs is an array of arguments
   // json is an object containing the json object we need to modify
 
-  setInputType(inpObj, 'json')
-
-// we have to types of argument for Ellipsify, plain and exclude so separate them out
-  var cmdArgsPlain = []
-  var cmdArgsExclude = []
-  for (let i = 0; i < cmdArgs.length; i++) {
-    if (cmdArgs[i].substr(0, 1) === '!') {
-      cmdArgsExclude.push(cmdArgs[i].substr(1))
-    } else {
-      cmdArgsPlain.push(cmdArgs[i])
+  if (setInputType(inpObj, 'json')) {
+    // we have to types of argument for Ellipsify, plain and exclude so separate them out
+    var cmdArgsPlain = []
+    var cmdArgsExclude = []
+    for (let i = 0; i < cmdArgs.length; i++) {
+      if (cmdArgs[i].substr(0, 1) === '!') {
+        cmdArgsExclude.push(cmdArgs[i].substr(1))
+      } else {
+        cmdArgsPlain.push(cmdArgs[i])
+      }
     }
-  }
-  for (let i = 0; i < cmdArgsPlain.length; i++) {
-    minimizeJsonProperty(inpObj.json, cmdArgsPlain[i], cmdArgsExclude)
+    for (let i = 0; i < cmdArgsPlain.length; i++) {
+      minimizeJsonProperty(inpObj.json, cmdArgsPlain[i], cmdArgsExclude)
+    }
   }
 }
 
 function minimizeJsonProperty (json, property, excludes) {
   // this function takes a json object as input.and for every occurence of the given property puts a placeholder
   // but only if it is an array or an object.
-  var arrPlaceholder = ['skPlaceholderArrEllipses'] // a valid json array used as a placeholder to be replaced later with [...] (which is not valid json)
-  var objPlaceholder = {'skPlaceholderObj': 'Ellipses'} // a valid json object used as a placeholder to be replaced later with {...} (which is not valid json)
-  var strPlaceholder = 'skPlaceholderStrEllipses'
+  var arrPlaceholder = ['fsnipPlaceholderArrEllipses'] // a valid json array used as a placeholder to be replaced later with [...] (which is not valid json)
+  var strPlaceholder = 'fsnipPlaceholderStrEllipses'
   var jsonPaths = jp.paths(json, buildJsonSearchPath(property)) // creates an array of all the paths of instances of the the property we want to minimize
   for (var i = 0; i < jsonPaths.length; i++) {
     let jsonPath = jp.stringify(jsonPaths[i])
@@ -229,9 +274,7 @@ function minimizeJsonProperty (json, property, excludes) {
             delete jp.value(json, jsonPath)[keys[j]]
           }
         }
-        // TODO remove??
-        // jp.value(json, jsonPath)['skPlaceholderObj'] = 'Ellipses' // add a placeholder for the Ellipses
-        jp.value(json, jsonPath, objPlaceholder)
+        jp.value(json, jsonPath)['fsnipPlaceholderObj'] = 'Ellipses' // add a placeholder for the Ellipses
         break
       case 'Array':
         jp.value(json, jsonPath, arrPlaceholder)
@@ -252,21 +295,32 @@ function jsonSnippet (inpObj, cmdArgs) {
   // the format of the call is eg.
   // '--snip vessel 2' which would extract the second instance of "vessel" in the json supplied
   // with the instance identifier being optional
-  setInputType(inpObj, 'json')
-  var occ = 1
-  if (cmdArgs.length === 1) {
-    occ = 1 // by default we snip the first occurrence of this property
-  } else if (cmdArgs.length === 2) {
-    if (typeof cmdArgs[1] === 'number') {
-      occ = cmdArgs[1]
+  if (setInputType(inpObj, 'json')) {
+    var occ = 1
+    if (cmdArgs.length === 1) {
+      occ = 1 // by default we snip the first occurrence of this property
+    } else if (cmdArgs.length === 2) {
+      if ((cmdArgs[1] - 0) === (cmdArgs[1] - 0)) {
+        occ = (cmdArgs[1] - 0)
+        if (occ < 1) {
+          inpObj.error.push('--snip requires its second argument to be a numeric values of at least 1 being the instance required')
+          return
+        }
+      } else {
+        inpObj.error.push("--snip requires its second argument to be numeric eg. '--snip vessel 2' with the optional second argument being the instance required")
+        return
+      }
     } else {
-      throw new Error("--snip requires its second argument to be numeric eg. '--snip vessel 2' with the optional second argument being the instance required")
+      inpObj.error.push("--snip requires 1 or 2 arguments eg. '--snip vessel 2' with the optional second argument being the instance required.")
+      return
     }
-  } else {
-    throw new Error("--snip requires 1 or 2 arguments eg. '--snip vessel 2'with the optional second argument being the instance required.")
+    var jsonPaths = jp.paths(inpObj.json, buildJsonSearchPath(cmdArgs[0])) // creates an array of all the paths to this property
+    if (jsonPaths.length < occ) {
+      inpObj.error.push('--snip failed because there were only ' + jsonPaths.length + " occurrences of '" + cmdArgs[0] + "' found.")
+      return
+    }
+    inpObj.json = jp.value(inpObj.json, jp.stringify(jsonPaths[occ - 1]))
   }
-  var jsonPaths = jp.paths(inpObj.json, buildJsonSearchPath(cmdArgs[0])) // creates an array of all the paths to this property
-  inpObj.json = jp.value(inpObj.json, jp.stringify(jsonPaths[occ - 1]))
 }
 
 // ===================delKeys Function===========================
@@ -275,14 +329,15 @@ function jsonDelKeys (inpObj, cmdArgs) {
   // inpObj is an object containing the json object we need to remove keys from
   // the format of the call is eg.
   // '-jsonDelKeys vessel gnss' which would delete all instances of "vessel" and "gnss" in the json supplied
-  setInputType(inpObj, 'json')
-  for (var i = 0; i < cmdArgs.length; i++) {
-    deleteJsonKey(inpObj.json, cmdArgs[i])
+  if (setInputType(inpObj, 'json')) {
+    for (var i = 0; i < cmdArgs.length; i++) {
+      deleteJsonKey(inpObj.json, cmdArgs[i])
+    }
   }
 }
 
 function deleteJsonKey (json, key) {
-  // deltes all occurences of key within json
+  // deletes all occurrences of key within json
   var jsonPaths = jp.paths(json, buildJsonSearchPath(key)) // creates an array of all the paths of instances of the key we want to delete
   var parent
   for (var i = 0; i < jsonPaths.length; i++) {
@@ -292,6 +347,88 @@ function deleteJsonKey (json, key) {
       parent.splice(jsonPaths[i][jsonPaths[i].length - 1], 1)
     } else {
       delete parent[jsonPaths[i][jsonPaths[i].length - 1]]
+    }
+  }
+}
+
+// ===================textFrom=================================
+function textFrom (inpObj, cmdArgs, inclusive) {
+  // cmdArgs is an array of arguments
+  // inpObj is an object containing the text object we need to snip contents from
+  // the format of the call is eg.
+  // '--textFrom "some text" 2 - would start from the second instance of "some text"
+  if (setInputType(inpObj, 'plain')) {
+    let occ
+    if (cmdArgs.length === 1) {
+      occ = 1 // by default we take from the first occurrence of this text
+    } else if (cmdArgs.length === 2) {
+      if ((cmdArgs[1] - 0) === (cmdArgs[1] - 0)) {
+        occ = (cmdArgs[1] - 0)
+        if (occ < 1) {
+          inpObj.error.push('--from and --start require their second argument to be a numeric values of at least 1 being the instance required')
+          return
+        }
+      } else {
+        inpObj.error.push("--from and --start require their its second argument to be numeric eg. '--from \"some text\" 2' with the optional second argument being the instance required")
+        return
+      }
+    } else {
+      inpObj.error.push("--from and --start require 1 or 2 arguments eg. '--from \"some text\"' with the optional second argument being the instance required.")
+      return
+    }
+    let x = -1
+    for (let i = 0; i < occ; i++) {
+      x = inpObj.plain.indexOf(cmdArgs[0], x + 1)
+    }
+    if (x === -1) {
+      inpObj.error.push('unable to find occurrence ' + occ + ' of "' + cmdArgs[0] + '"')
+      return
+    }
+    if (inclusive === true) {
+      inpObj.plain = inpObj.plain.substr(x)
+    } else {
+      inpObj.plain = inpObj.plain.substr(x + cmdArgs[0].length)
+    }
+  }
+}
+
+// ===================textFrom=================================
+function textTo (inpObj, cmdArgs, inclusive) {
+  // cmdArgs is an array of arguments
+  // inpObj is an object containing the text object we need to snip contents from
+  // the format of the call is eg.
+  // '--textTo "some text" 2 - would go up to the second instance of "some text"
+  if (setInputType(inpObj, 'plain')) {
+    let occ
+    if (cmdArgs.length === 1) {
+      occ = 1 // by default we take from the first occurrence of this text
+    } else if (cmdArgs.length === 2) {
+      if ((cmdArgs[1] - 0) === (cmdArgs[1] - 0)) {
+        occ = (cmdArgs[1] - 0)
+        if (occ < 1) {
+          inpObj.error.push('--to and --finish require their second argument to be a numeric values of at least 1 being the instance required')
+          return
+        }
+      } else {
+        inpObj.error.push("--to and --finish require their its second argument to be numeric eg. '--from \"some text\" 2' with the optional second argument being the instance required")
+        return
+      }
+    } else {
+      inpObj.error.push("--to and --finish require 1 or 2 arguments eg. '--from \"some text\"' with the optional second argument being the instance required.")
+      return
+    }
+    let x = -1
+    for (let i = 0; i < occ; i++) {
+      x = inpObj.plain.indexOf(cmdArgs[0], x + 1)
+    }
+    if (x === -1) {
+      inpObj.error.push('unable to find occurrence ' + occ + ' of "' + cmdArgs[0] + '"')
+      return
+    }
+    if (inclusive === true) {
+      inpObj.plain = inpObj.plain.substring(0, x + cmdArgs[0].length)
+    } else {
+      inpObj.plain = inpObj.plain.substring(0, x)
     }
   }
 }

@@ -1,6 +1,14 @@
 {
-  "gnss": {...},
+  "gnss": {
+    "method": ["visual"],
+    "state": "alert",
+    "message": "GPS signal lost!",
+    ...
+  },
   "anchor": {
-    "currentRadius": {...}
+    "currentRadius": {
+      "$source": "x.y.z",
+      ...
+    }
   }
 }

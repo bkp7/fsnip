@@ -60,3 +60,24 @@ bla bla
 ```
 
 Keys can be identified using either plain text or XPath expressions. eg. `alarm` is equivalent to `$..alarm`. Dot or bracket notation is supported ie. `$.vessels.notifications.mob` is equivalent to `$['vessels'].['notifications'].['mob']`. Keys names which have spaces or start with $, -, or ! need to use the bracket notation. Other XPath notation including filter expressions, and nested expression are also supported, see [jsonpath](https://www.npmjs.com/package/jsonpath) for explanation of all valid pathExpressions.
+
+## Detailed Specifications
+
+### --prettify
+The prettify option will adjust the format output to make reading the output easier. It has three optional arguments:
+`--prettify [indent] [maxLength] [margins]`
+- indent: Defaults to 2. Specifies the number of spaces to indent each line by. This works the same way as the indent option of `JSON.stringify`.
+- maxLength: Defaults to 45. Lines will be tried to be kept at maximum this many characters long.
+- margins: Defaults to false. Whether or not to add “margins” around brackets and braces:
+ - `false: {"a": [1]}`
+ - `true: { "a": [ 1 ] }`
+
+The prettify functionality uses the [json-stringify-pretty-compact](https://www.npmjs.com/package/json-stringify-pretty-compact) package.
+
+`--prettify` ie. using default values is equivalent to `--prettify 2 45 false`
+
+Looking at the Javascript stringify function:
+`--prettify 3 0` is equivalent to `JSON.stringify(obj, null, 3)`
+`--prettify 2 infinity` is equivalent to `JSON.stringify(obj)`
+
+If `--prettify` is not present, but there are any changes made to json using other operators, the default prettify command will automatically be used.

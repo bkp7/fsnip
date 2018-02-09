@@ -7,9 +7,19 @@
     "$source": "x.y.z"
   },
   "navigation": {
-    "gnss": {...},
+    "gnss": {
+      "method": ["visual"],
+      "state": "alert",
+      "message": "GPS signal lost!",
+      ...
+    },
     "anchor": {
-      "currentRadius": {...}
+      "currentRadius": {
+        "method": ["sound"],
+        "state": "alarm",
+        "message": "Dragging anchor!",
+        ...
+      }
     }
   }
 }

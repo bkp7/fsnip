@@ -1,0 +1,3 @@
+An example text document to take snips from
+#loc1_start
+this text is within location 1
