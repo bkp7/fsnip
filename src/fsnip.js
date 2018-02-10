@@ -10,12 +10,6 @@ const jp = require('jsonpath')
 const stringify = require('json-stringify-pretty-compact')
 const chalk = require('chalk')
 
-// inline test of correct split functionality - the following should split in 13 items
-let test = split("one two[ ' bla[' ] thr]ee f[' o u ']r five' $.six.Data.Devices[0].Type $['Se]v en']['D a t a']['Devices'][0] $..Eight[(@.length - 1)]['Type']  $..Nine[?(@.Found == 1)] $..Ten[{$.EventData..Selected}] $..Eleven[{$..ElevenStill[{$..eleven[?(@.Found == 1)]}]}]    t[' wel ve ']]r OK")
-if (test.length !== 13 || test[12] !== 'OK') {
-  throw new Error('fsnip: function split(): self test failed.')
-}
-
 let args = process.argv
 
 if (args.length === 3 && args[2] === '--help') {
@@ -31,12 +25,14 @@ if (args.length === 3 && args[2] === '--help') {
   try {
     var txt = fs.readFileSync(args[2]).toString()
   } catch (err) {
-    console.error(chalk.red("unable to read file '" + args[2] + "'"))
+    console.error(chalk.redBright("unable to read file '" + args[2] + "'"))
   }
   let arg = stringifyArray(args, 3, args.length, ' ')
-  console.log(fsnipDo(arg, txt))
+  if (typeof txt !== 'undefined') {
+    console.log(fsnipDo(arg, txt))
+  }
 } else { // we couldn't recognise the format on the command line
-  console.error(chalk.red('Unrecognised arguments passed to fsnip. See node fsnip --help'))
+  console.error(chalk.redBright('Unrecognised arguments passed to fsnip. See fsnip --help'))
 }
 
 function fsnipDo (cmdOptsString, inputText) {
@@ -76,11 +72,11 @@ function fsnipDo (cmdOptsString, inputText) {
   if (src.error.length === 0) {
     return src.text
   } else {
-    return chalk.red(src.error)
+    return chalk.redBright(src.error)
   }
 }
 
-function split (inputText) {
+export function split (inputText) {
   // splits the supplied text on any whitespace that is not within [ ] delimiters. Also if within [] delimiters and within '' delimiters a ] will be ignored.
   // done this way rather than using regex which is not very good at dealing with delimiters
   const whiteSpace = 1
@@ -241,7 +237,7 @@ function jsonEllipsify (inpObj, cmdArgs) {
   // json is an object containing the json object we need to modify
 
   if (setInputType(inpObj, 'json')) {
-    // we have to types of argument for Ellipsify, plain and exclude so separate them out
+    // we have two types of argument for Ellipsify, plain and exclude so separate them out
     var cmdArgsPlain = []
     var cmdArgsExclude = []
     for (let i = 0; i < cmdArgs.length; i++) {
@@ -251,6 +247,7 @@ function jsonEllipsify (inpObj, cmdArgs) {
         cmdArgsPlain.push(cmdArgs[i])
       }
     }
+    if (cmdArgsPlain.length === 0) { cmdArgsPlain.push('$') }
     for (let i = 0; i < cmdArgsPlain.length; i++) {
       minimizeJsonProperty(inpObj.json, cmdArgsPlain[i], cmdArgsExclude)
     }
@@ -369,7 +366,7 @@ function textFrom (inpObj, cmdArgs, inclusive) {
           return
         }
       } else {
-        inpObj.error.push("--from and --start require their its second argument to be numeric eg. '--from \"some text\" 2' with the optional second argument being the instance required")
+        inpObj.error.push("--from and --start require their second argument to be numeric eg. '--from \"some text\" 2' with the optional second argument being the instance required")
         return
       }
     } else {
@@ -410,7 +407,7 @@ function textTo (inpObj, cmdArgs, inclusive) {
           return
         }
       } else {
-        inpObj.error.push("--to and --finish require their its second argument to be numeric eg. '--from \"some text\" 2' with the optional second argument being the instance required")
+        inpObj.error.push("--to and --finish require their second argument to be numeric eg. '--from \"some text\" 2' with the optional second argument being the instance required")
         return
       }
     } else {

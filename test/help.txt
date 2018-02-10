@@ -1,0 +1,9 @@
+fsnip is a tool for extracting json snippets from json files.
+
+Usage:
+TODO still 
+  fsnip FILE [options [arguments]]    process the file and output the result to the console
+  FILE         Specifies the file to process.
+  --ellipsify  replaces the passed object with ellipses (...)
+                 but excludes any keys which follow prepended by !
+                 eg. fsnip myfile.json --ellipsify $..address !postcode
