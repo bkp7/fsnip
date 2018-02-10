@@ -27,18 +27,16 @@ if (args.length === 3 && args[2] === '--help') {
   } catch (err) {
     console.error(chalk.redBright("unable to read file '" + args[2] + "'"))
   }
-  let arg = stringifyArray(args, 3, args.length, ' ')
   if (typeof txt !== 'undefined') {
-    console.log(fsnipDo(arg, txt))
+    console.log(fsnipDo(args.slice(3), txt))
   }
 } else { // we couldn't recognise the format on the command line
   console.error(chalk.redBright('Unrecognised arguments passed to fsnip. See fsnip --help'))
 }
 
-function fsnipDo (cmdOptsString, inputText) {
+function fsnipDo (cmdOpts, inputText) {
   // does the processing of the fsnip command
   // inputText is the text we want to modify
-  let cmdOpts = split(cmdOptsString)
   if (cmdOpts === null || cmdOpts.length === 0) { return inputText } // no processing required as no options passed in
   var src = { // a temporary structure containing the text we are working on its type eg. 'json' (which is set later)
     text: inputText,
@@ -53,18 +51,16 @@ function fsnipDo (cmdOptsString, inputText) {
   var cmdOpt = '' // current option from the cmdOptsString list
   var cmdArgs = [] // array containing any arguments for the cmdOpt
   for (var i = 0; i < cmdOpts.length; i++) {
-    if (!cmdOpts[i].match(/^\s+$/) && !(cmdOpts[i] === '')) { // only process the option if it is not zero length or whitespace
-      if (cmdOpts[i].substr(0, 2) === '--') { // this is a new option eg. -jsonEllipsify
-        if (cmdOpt !== '') runOption(cmdOpt, cmdArgs, src) // process/run any previous Option we found
-        cmdOpt = cmdOpts[i] // store the new option we have found
-        cmdArgs = [] // reset ready for any new arguments
-      } else {
-        // this must be an argument for the current option
-        if (cmdOpt === '') { // error if we don't currently have an option
-          src.error.push('invalid argument ' + i + " '" + cmdOpts[i] + "' in '" + cmdOptsString + "' passed without valid option to fsnip")
-        }
-        cmdArgs.push(cmdOpts[i])
+    if (cmdOpts[i].substr(0, 2) === '--') { // this is a new option eg. -jsonEllipsify
+      if (cmdOpt !== '') runOption(cmdOpt, cmdArgs, src) // process/run any previous Option we found
+      cmdOpt = cmdOpts[i] // store the new option we have found
+      cmdArgs = [] // reset ready for any new arguments
+    } else {
+      // this must be an argument for the current option
+      if (cmdOpt === '') { // error if we don't currently have an option
+        src.error.push("invalid argument '" + cmdOpts[i] + "' passed without valid option to fsnip")
       }
+      cmdArgs.push(cmdOpts[i])
     }
   }
   if (cmdOpt !== '') runOption(cmdOpt, cmdArgs, src) // process/run the very last Option we found
@@ -73,57 +69,6 @@ function fsnipDo (cmdOptsString, inputText) {
     return src.text
   } else {
     return chalk.redBright(src.error)
-  }
-}
-
-export function split (inputText) { // only exported for testing purposes
-  // splits the supplied text on any whitespace that is not within [ ] delimiters. Also if within [] delimiters and within '' delimiters a ] will be ignored.
-  // done this way rather than using regex which is not very good at dealing with delimiters
-  const whiteSpace = 1
-  const delimitedSq = 2
-  const delimitedQt = 3
-  const element = 4
-  var thisChar = '' // holds the character we are working on
-  var zone = whiteSpace // flag indicating what we are currently in, ie whiteSpace, delimited, or an element
-  var start = 0 // the start of an element ( only valid if we are not in whitespace)
-  var result = [] // holds the resultant array we will return
-  for (var i = 0; i < inputText.length; i++) {
-    thisChar = inputText.substr(i, 1)
-    if (zone === delimitedQt) {
-      if (thisChar === "'") {
-        zone = delimitedSq
-      } // else do nothing, just move on to next char
-    } else if (zone === delimitedSq) {
-      if (thisChar === "'") {
-        zone = delimitedQt
-      } else if (thisChar === ']') { // now reached the end of the delimited text
-        zone = element
-      } // else, do nothing, just move on to the next character
-    } else {
-      if (isWhiteSpace(thisChar)) {
-        if (zone !== whiteSpace) { // we have reached the end of an element so add it to our output
-          result.push(inputText.substr(start, i - start))
-          zone = whiteSpace
-        }
-      } else { // we are not delimited and this character is not whitespace
-        if (thisChar === '[') { // we are entering delimited
-          zone = delimitedSq
-        } else {
-          if (zone === whiteSpace) { // we are at the start of a new element
-            start = i
-            zone = element
-          } // else we are in an element and this character is not whitespace, so just move onto the next character
-        }
-      }
-    }
-  }
-  if (zone !== whiteSpace) {
-    result.push(inputText.substr(start, i - start))
-  }
-  return result
-
-  function isWhiteSpace (char) {
-    return (char === ' ' || char === '\n' || char === '\r' || char === '\t' || char === '\v' || char === '\f')
   }
 }
 
@@ -432,21 +377,4 @@ function textTo (inpObj, cmdArgs, inclusive) {
       inpObj.plain = inpObj.plain.substring(0, x)
     }
   }
-}
-
-function stringifyArray (arr, idxFrom, idxTo, separator) {
-  // this function takes an array of strings and creates a single string consisting of the required items in the array separated by the sweparator
-  var blnFirst = true
-  var result = ''
-  for (var i = idxFrom; i <= idxTo; i++) {
-    if (i < arr.length) {
-      if (blnFirst) {
-        blnFirst = false
-      } else {
-        result += separator
-      }
-      result += arr[i]
-    }
-  }
-  return result
 }

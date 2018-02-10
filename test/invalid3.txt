@@ -1,1 +1,1 @@
-invalid argument 0 'navigation' in 'navigation' passed without valid option to fsnip
+invalid argument 'navigation' passed without valid option to fsnip

@@ -5,7 +5,6 @@
  const fs = require('fs')
  const path = require('path')
  const minimizeJsonProperty = require('../dist/fsnip.js').minimizeJsonProperty
- const split = require('../dist/fsnip.js').split
  const setInputType = require('../dist/fsnip.js').setInputType
 
  const tests = [
@@ -105,10 +104,4 @@
        })
      })
    }
-   it('split', function (done) {
-     let test = split("one two[ ' bla[' ] thr]ee f[' o u ']r five' $.six.Data.Devices[0].Type $['Se]v en']['D a t a']['Devices'][0] $..Eight[(@.length - 1)]['Type']  $..Nine[?(@.Found == 1)] $..Ten[{$.EventData..Selected}] $..Eleven[{$..ElevenStill[{$..eleven[?(@.Found == 1)]}]}]    t[' wel ve ']]r OK")
-     assert.equal(test.length, 13)
-     assert.equal(test[12], 'OK')
-     done()
-   })
  })

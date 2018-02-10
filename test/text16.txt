@@ -1,4 +1,4 @@
-is within location 1
+this text is within location 1
 #loc1_end
 Or comment style characters could be used
 // startHere
