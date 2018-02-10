@@ -76,7 +76,7 @@ function fsnipDo (cmdOptsString, inputText) {
   }
 }
 
-export function split (inputText) {
+export function split (inputText) { // only exported for testing purposes
   // splits the supplied text on any whitespace that is not within [ ] delimiters. Also if within [] delimiters and within '' delimiters a ] will be ignored.
   // done this way rather than using regex which is not very good at dealing with delimiters
   const whiteSpace = 1
@@ -177,17 +177,21 @@ function postProcess (inpObj) {
   }
 }
 
-function setInputType (inpObj, newType) {
-  if (inpObj.type === '') { // type has not previously been set
+export function setInputType (inpObj, newType) { // only exported for testing purposes
+  if (typeof inpObj.type === 'undefined' || inpObj.type === '') { // type has not previously been set
     inpObj.type = newType
     if (newType === 'json') {
       inpObj.json = JSON.parse(inpObj.text)
       jsonPrettify(inpObj) // sets default output options for json
+      return true
     } else if (newType === 'plain') {
       inpObj.plain = inpObj.text
+      return true
+    } else {
+      return false
     }
-    return true
   } else if (inpObj.type !== newType) { // it's already been set to something else so there's a problem
+    if (typeof inpObj.error === 'undefined') { inpObj.error = [] }
     inpObj.error.push('cannot mix options designed to process different types of file')
     return false
   } else {
@@ -254,8 +258,8 @@ function jsonEllipsify (inpObj, cmdArgs) {
   }
 }
 
-function minimizeJsonProperty (json, property, excludes) {
-  // this function takes a json object as input.and for every occurence of the given property puts a placeholder
+export function minimizeJsonProperty (json, property, excludes) { // only exported for test purposes
+  // this function takes a json object as input.and for every occurrence of the given property puts a placeholder
   // but only if it is an array or an object.
   var arrPlaceholder = ['fsnipPlaceholderArrEllipses'] // a valid json array used as a placeholder to be replaced later with [...] (which is not valid json)
   var strPlaceholder = 'fsnipPlaceholderStrEllipses'

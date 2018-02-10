@@ -4,12 +4,15 @@
  const {exec} = require('child_process')
  const fs = require('fs')
  const path = require('path')
+ const minimizeJsonProperty = require('../dist/fsnip.js').minimizeJsonProperty
  const split = require('../dist/fsnip.js').split
+ const setInputType = require('../dist/fsnip.js').setInputType
 
  const tests = [
    {name: 'Simple 1', cmd: 'fsnip ./demo.json', resultFile: 'simple1.txt'},
    {name: 'Simple 2', cmd: 'fsnip ./demo.json --json', resultFile: 'simple2.txt'},
-   {name: 'Prettify', cmd: 'fsnip ./demo.json --prettify', resultFile: 'prettify.txt'},
+   {name: 'Simple 3', cmd: 'fsnip ./demo.json  \t    --json', resultFile: 'simple3.txt'},
+   {name: 'Prettify 1', cmd: 'fsnip ./demo.json --prettify', resultFile: 'prettify1.txt'},
    {name: 'Prettify 2', cmd: 'fsnip ./demo.json --prettify 2 infinity', resultFile: 'prettify2.txt'},
    {name: 'Prettify 3', cmd: 'fsnip ./demo.json --prettify 3 0', resultFile: 'prettify3.txt'},
    {name: 'Prettify 4', cmd: 'fsnip ./demo.json --prettify 3 45 true', resultFile: 'prettify4.txt'},
@@ -33,6 +36,8 @@
    {name: 'Invalid 6', cmd: 'fsnip ./demo.json --from vessels --ellipsify method', resultFile: 'invalid6.txt'},
    {name: 'Invalid 7', cmd: 'fsnip ./demo.json --from vessels --snip notifications', resultFile: 'invalid7.txt'},
    {name: 'Invalid 8', cmd: 'fsnip ./demo.json --from vessels --delKeys $..method[0]', resultFile: 'invalid8.txt'},
+   {name: 'Invalid 9', cmd: 'fsnip ./demo.json --delKeys $..method[0] --from vessels', resultFile: 'invalid9.txt'},
+   {name: 'Invalid 10', cmd: 'fsnip ./demo.json --delKeys $..method[0] --to vessels', resultFile: 'invalid10.txt'},
    {name: 'Text 1', cmd: 'fsnip ./demo.txt --from #loc1_start', resultFile: 'text1.txt'},
    {name: 'Text 2', cmd: 'fsnip ./demo.txt --start #loc1_start', resultFile: 'text2.txt'},
    {name: 'Text 3', cmd: 'fsnip ./demo.txt --to #loc1_end', resultFile: 'text3.txt'},
@@ -58,6 +63,26 @@
    {name: 'Error 3', cmd: 'fsnip ./fred.fred', stderr: 'unable to read file \'./fred.fred\'\n'},
    {name: 'Error 4', cmd: 'fsnip', stderr: 'Unrecognised arguments passed to fsnip. See fsnip --help\n'}
  ]
+
+ describe('unit tests', function () {
+   it('setInputType 1', function () {
+     assert.equal(setInputType({}, 'invalidType'), false)
+   })
+   it('setInputType 2', function () {
+     assert.equal(setInputType({}, ''), false)
+   })
+   it('setInputType 3', function () {
+     assert.equal(setInputType({type: ''}, ''), false)
+   })
+   it('setInputType 4', function () {
+     assert.equal(setInputType({type: 'something'}, 'somethingElse'), false)
+   })
+   it('minimizeJsonProperty', function () {
+     let testJson = {'first': true}
+     minimizeJsonProperty(testJson, 'first')
+     assert.deepEqual(testJson, {'first': true})
+   })
+ })
 
  describe('fsnip tests', function () {
    for (let i = 0; i < tests.length; i++) {
