@@ -21,7 +21,7 @@
    {name: 'Ellipsify 2', cmd: 'fsnip ./demo.json --ellipsify', resultFile: 'ellipsify2.txt'},
    {name: 'Snip', cmd: 'fsnip ./demo.json --snip $..currentRadius', resultFile: 'snip.txt'},
    {name: 'Complex 1', cmd: 'fsnip ./demo.json --snip notifications --ellipsify gnss currentRadius ~method ~state ~message', resultFile: 'complex1.txt'},
-   {name: 'Complex 2', cmd: 'fsnip ./demo.json --snip navigation --ellipsify gnss ~method ~state ~message --ellipsify currentRadius ~$source', resultFile: 'complex2.txt'},
+   {name: 'Complex 2', cmd: 'fsnip ./demo.json --snip navigation --ellipsify gnss ~method ~state ~message --ellipsify currentRadius ~"$source"', resultFile: 'complex2.txt'},
    {name: 'delKeys', cmd: 'fsnip ./demo.json --ellipsify $ ~vessels --delKeys navigation --ellipsify uuid', resultFile: 'delKeys.txt'},
    {name: 'delKeys 2', cmd: 'fsnip ./demo.json --delKeys $..method[0]', resultFile: 'delKeys2.txt'},
    {name: 'Snip error 1', cmd: 'fsnip ./demo.json --snip', resultFile: 'snipError1.txt'},
