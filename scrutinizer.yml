@@ -11,5 +11,3 @@ filter:
   paths:
     - "src/"
     - "test/"
-  excluded_paths:
-    - "dist/"
