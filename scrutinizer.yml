@@ -9,5 +9,6 @@ checks:
   javascript: true
 filter:
   paths:
-    - "src/"
-    - "test/"
+    - "src/*"
+    - "dist/*"
+    - "test/*"
