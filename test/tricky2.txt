@@ -1,0 +1,6 @@
+{
+  "address": {
+    "street name": "my street",
+    ...
+  }
+}

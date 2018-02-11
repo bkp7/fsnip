@@ -19,8 +19,8 @@ if (args.length === 3 && args[2] === '--help') {
                '  fsnip FILE [options [arguments]]    process the file and output the result to the console\n' +
                '  FILE         Specifies the file to process.\n' +
                '  --ellipsify  replaces the passed object with ellipses (...)\n' +
-               '                 but excludes any keys which follow prepended by !\n' +
-               '                 eg. fsnip myfile.json --ellipsify $..address !postcode')
+               '                 but excludes any keys which follow prepended by ~\n' +
+               '                 eg. fsnip myfile.json --ellipsify $..address ~postcode')
 } else if (args.length >= 3) {
   try {
     var txt = fs.readFileSync(args[2]).toString()
@@ -190,7 +190,7 @@ function jsonEllipsify (inpObj, cmdArgs) {
     var cmdArgsPlain = []
     var cmdArgsExclude = []
     for (let i = 0; i < cmdArgs.length; i++) {
-      if (cmdArgs[i].substr(0, 1) === '!') {
+      if (cmdArgs[i].substr(0, 1) === '~') {
         cmdArgsExclude.push(cmdArgs[i].substr(1))
       } else {
         cmdArgsPlain.push(cmdArgs[i])
