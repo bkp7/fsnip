@@ -81,3 +81,14 @@ Looking at the Javascript stringify function:
 `--prettify 2 infinity` is equivalent to `JSON.stringify(obj)`
 
 If `--prettify` is not present, but there are any changes made to json using other operators, the default prettify command will automatically be used.
+
+## Cross Platform compatibility issues
+
+**fsnip** was designed to be cross platform compatible.
+
+On the command line `"` and `'` are interpretted differently on posix and windows. For this tool we need the ability to pass arguments which include 'special' characters such as spaces, etc.
+
+In addition for options such as `--ellipsify` we can pass arguments meaning 'but not' which are indicated by a prepended `~`.
+
+So for example if you wish to exclude (but not) a json key called `"~my example"` you should use:
+`fsnip myfile.json $ ellipsify mykey ~'"~my example"'` ie using both single and double quotes, with the single quotes as outer and the tilde indicating exclude prepending the delimited text.

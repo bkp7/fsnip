@@ -5,7 +5,7 @@
 fsnip is a command line utility to extract and modify json from a file.
 
 */
-const fs = require('fs-extra')
+const fs = require('fs')
 const jp = require('jsonpath')
 const stringify = require('json-stringify-pretty-compact')
 const chalk = require('chalk')
@@ -152,6 +152,16 @@ function buildJsonSearchPath (keyName) {
   }
 }
 
+function removeQuotes (str) {
+  // if the passed string has matching encapsulating quotes these are removed
+  if ((str.substr(0, 1) === '\'' && str.substr(-1) === '\'') ||
+      (str.substr(0, 1) === '"' && str.substr(-1) === '"')) {
+    return str.substr(1, str.length - 2)
+  } else {
+    return str
+  }
+}
+
 // =================json===============================
 function json (inpObj, cmdArgs) {
     // cmdArgs is an array of arguments
@@ -191,9 +201,9 @@ function jsonEllipsify (inpObj, cmdArgs) {
     var cmdArgsExclude = []
     for (let i = 0; i < cmdArgs.length; i++) {
       if (cmdArgs[i].substr(0, 1) === '~') {
-        cmdArgsExclude.push(cmdArgs[i].substr(1))
+        cmdArgsExclude.push(removeQuotes(cmdArgs[i].substr(1)))
       } else {
-        cmdArgsPlain.push(cmdArgs[i])
+        cmdArgsPlain.push(removeQuotes(cmdArgs[i]))
       }
     }
     if (cmdArgsPlain.length === 0) { cmdArgsPlain.push('$') }
@@ -260,9 +270,9 @@ function jsonSnippet (inpObj, cmdArgs) {
       inpObj.error.push("--snip requires 1 or 2 arguments eg. '--snip vessel 2' with the optional second argument being the instance required.")
       return
     }
-    var jsonPaths = jp.paths(inpObj.json, buildJsonSearchPath(cmdArgs[0])) // creates an array of all the paths to this property
+    var jsonPaths = jp.paths(inpObj.json, buildJsonSearchPath(removeQuotes(cmdArgs[0]))) // creates an array of all the paths to this property
     if (jsonPaths.length < occ) {
-      inpObj.error.push('--snip failed because there were only ' + jsonPaths.length + " occurrences of '" + cmdArgs[0] + "' found.")
+      inpObj.error.push('--snip failed because there were only ' + jsonPaths.length + " occurrences of '" + removeQuotes(cmdArgs[0]) + "' found.")
       return
     }
     inpObj.json = jp.value(inpObj.json, jp.stringify(jsonPaths[occ - 1]))
@@ -277,7 +287,7 @@ function jsonDelKeys (inpObj, cmdArgs) {
   // '-jsonDelKeys vessel gnss' which would delete all instances of "vessel" and "gnss" in the json supplied
   if (setInputType(inpObj, 'json')) {
     for (var i = 0; i < cmdArgs.length; i++) {
-      deleteJsonKey(inpObj.json, cmdArgs[i])
+      deleteJsonKey(inpObj.json, removeQuotes(cmdArgs[i]))
     }
   }
 }
@@ -323,17 +333,18 @@ function textFrom (inpObj, cmdArgs, inclusive) {
       return
     }
     let x = -1
+    let arg = removeQuotes(cmdArgs[0])
     for (let i = 0; i < occ; i++) {
-      x = inpObj.plain.indexOf(cmdArgs[0], x + 1)
+      x = inpObj.plain.indexOf(arg, x + 1)
     }
     if (x === -1) {
-      inpObj.error.push('unable to find occurrence ' + occ + ' of "' + cmdArgs[0] + '"')
+      inpObj.error.push('unable to find occurrence ' + occ + ' of "' + arg + '"')
       return
     }
     if (inclusive === true) {
       inpObj.plain = inpObj.plain.substr(x)
     } else {
-      inpObj.plain = inpObj.plain.substr(x + cmdArgs[0].length)
+      inpObj.plain = inpObj.plain.substr(x + arg.length)
     }
   }
 }
@@ -364,15 +375,16 @@ function textTo (inpObj, cmdArgs, inclusive) {
       return
     }
     let x = -1
+    let arg = removeQuotes(cmdArgs[0])
     for (let i = 0; i < occ; i++) {
-      x = inpObj.plain.indexOf(cmdArgs[0], x + 1)
+      x = inpObj.plain.indexOf(arg, x + 1)
     }
     if (x === -1) {
-      inpObj.error.push('unable to find occurrence ' + occ + ' of "' + cmdArgs[0] + '"')
+      inpObj.error.push('unable to find occurrence ' + occ + ' of "' + arg + '"')
       return
     }
     if (inclusive === true) {
-      inpObj.plain = inpObj.plain.substring(0, x + cmdArgs[0].length)
+      inpObj.plain = inpObj.plain.substring(0, x + arg.length)
     } else {
       inpObj.plain = inpObj.plain.substring(0, x)
     }
