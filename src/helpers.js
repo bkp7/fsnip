@@ -76,36 +76,22 @@ function runOption (option, args, inpObj) {
   // arguments is an array of arguments for the option
   // inpObj is an object containing the text, type and json object we need to modify
   // this function acts as a marsheller to identify options and process them accordingly
-  switch (option) {
-    case '--json':
-      json(inpObj, args)
-      break
-    case '--prettify':
-      jsonPrettify(inpObj, args)
-      break
-    case '--ellipsify':
-      jsonEllipsify(inpObj, args)
-      break
-    case '--snip':
-      jsonSnippet(inpObj, args)
-      break
-    case '--delKeys':
-      jsonDelKeys(inpObj, args)
-      break
-    case '--from':
-      textFrom(inpObj, args, false)
-      break
-    case '--start':
-      textFrom(inpObj, args, true)
-      break
-    case '--to':
-      textTo(inpObj, args, false)
-      break
-    case '--finish':
-      textTo(inpObj, args, true)
-      break
-    default:
-      inpObj.error.push("invalid option '" + option + "' for fsnip")
+  let funcs = {
+    '--json': () => { json(inpObj, args) },
+    '--prettify': () => { jsonPrettify(inpObj, args) },
+    '--ellipsify': () => { jsonEllipsify(inpObj, args) },
+    '--snip': () => { jsonSnippet(inpObj, args) },
+    '--delKeys': () => { jsonDelKeys(inpObj, args) },
+    '--from': () => { textFrom(inpObj, args, false) },
+    '--start': () => { textFrom(inpObj, args, true) },
+    '--to': () => { textTo(inpObj, args, false) },
+    '--finish': () => { textTo(inpObj, args, true) }
+  }
+
+  if (funcs[option]) {
+    funcs[option]()
+  } else {
+    inpObj.error.push("invalid option '" + option + "' for fsnip")
   }
 }
 
@@ -325,16 +311,12 @@ function textFrom (inpObj, cmdArgs, inclusive) {
   if (setInputType(inpObj, 'plain')) {
     let x = findLocation(inpObj, cmdArgs, inclusive ? '--start' : '--from')
     if (x.found) {
-      if (inclusive === true) {
-        inpObj.plain = inpObj.plain.substr(x.loc)
-      } else {
-        inpObj.plain = inpObj.plain.substr(x.loc + x.len)
-      }
+      inpObj.plain = inpObj.plain.substr(x.loc + (inclusive === true ? 0 : x.len))
     }
   }
 }
 
-// ===================textFrom=================================
+// ===================textTo===================================
 function textTo (inpObj, cmdArgs, inclusive) {
   // cmdArgs is an array of arguments
   // inpObj is an object containing the text object we need to snip contents from
@@ -343,11 +325,7 @@ function textTo (inpObj, cmdArgs, inclusive) {
   if (setInputType(inpObj, 'plain')) {
     let x = findLocation(inpObj, cmdArgs, inclusive ? '--finish' : '--to')
     if (x.found) {
-      if (inclusive === true) {
-        inpObj.plain = inpObj.plain.substring(0, x.loc + x.len)
-      } else {
-        inpObj.plain = inpObj.plain.substring(0, x.loc)
-      }
+      inpObj.plain = inpObj.plain.substring(0, x.loc + (inclusive === true ? x.len : 0))
     }
   }
 }
