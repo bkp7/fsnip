@@ -50,7 +50,7 @@ function fsnipDo (cmdOpts, inputText) {
   var cmdOpt = '' // current option from the cmdOptsString list
   var cmdArgs = [] // array containing any arguments for the cmdOpt
   for (var i = 0; i < cmdOpts.length; i++) {
-    if (cmdOpts[i].substr(0, 2) === '--') { // this is a new option eg. -jsonEllipsify
+    if (cmdOpts[i].substr(0, 2) === '--') { // this is a new option eg. --ellipsify
       if (cmdOpt !== '') { runOption(cmdOpt, cmdArgs, src) } // process/run any previous Option we found
       cmdOpt = cmdOpts[i] // store the new option we have found
       cmdArgs = [] // reset ready for any new arguments
@@ -58,17 +58,14 @@ function fsnipDo (cmdOpts, inputText) {
       // this must be an argument for the current option
       if (cmdOpt === '') { // error if we don't currently have an option
         src.error.push("invalid argument '" + cmdOpts[i] + "' passed without valid option to fsnip")
+      } else {
+        cmdArgs.push(cmdOpts[i])
       }
-      cmdArgs.push(cmdOpts[i])
     }
   }
   if (cmdOpt !== '') { runOption(cmdOpt, cmdArgs, src) } // process/run the very last Option we found
   postProcess(src)
-  if (src.error.length === 0) {
-    return src.text
-  } else {
-    return chalk.redBright(src.error)
-  }
+  return src.error.length === 0 ? src.text : chalk.redBright(src.error)
 }
 
 function runOption (option, args, inpObj) {
@@ -218,13 +215,7 @@ export function minimizeJsonProperty (json, property, excludes) { // only export
     let jsonPath = jp.stringify(jsonPaths[i])
     switch (jp.value(json, jsonPath).constructor.name) {
       case 'Object':
-        var keys = Object.keys(jp.value(json, jsonPath))
-        for (var j = 0; j < keys.length; j++) {
-          if (excludes.indexOf(keys[j]) === -1) {
-            // this key is not in the excludes list so we need to delete it
-            delete jp.value(json, jsonPath)[keys[j]]
-          }
-        }
+        delKeys(json, jsonPath, excludes)
         jp.value(json, jsonPath)['fsnipPlaceholderObj'] = 'Ellipses' // add a placeholder for the Ellipses
         break
       case 'Array':
@@ -235,6 +226,16 @@ export function minimizeJsonProperty (json, property, excludes) { // only export
         break
       default:
         // do nothing
+    }
+  }
+
+  function delKeys(json, jsonPath, excludes) {
+    var keys = Object.keys(jp.value(json, jsonPath))
+    for (var j = 0; j < keys.length; j++) {
+      if (excludes.indexOf(keys[j]) === -1) {
+        // this key is not in the excludes list so we need to delete it
+        delete jp.value(json, jsonPath)[keys[j]]
+      }
     }
   }
 }
