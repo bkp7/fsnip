@@ -51,7 +51,7 @@ function fsnipDo (cmdOpts, inputText) {
   var cmdArgs = [] // array containing any arguments for the cmdOpt
   for (var i = 0; i < cmdOpts.length; i++) {
     if (cmdOpts[i].substr(0, 2) === '--') { // this is a new option eg. --ellipsify
-      if (cmdOpt !== '') { runOption(cmdOpt, cmdArgs, src) } // process/run any previous Option we found
+      processOption()
       cmdOpt = cmdOpts[i] // store the new option we have found
       cmdArgs = [] // reset ready for any new arguments
     } else {
@@ -63,9 +63,16 @@ function fsnipDo (cmdOpts, inputText) {
       }
     }
   }
-  if (cmdOpt !== '') { runOption(cmdOpt, cmdArgs, src) } // process/run the very last Option we found
+  processOption()
   postProcess(src)
   return src.error.length === 0 ? src.text : chalk.redBright(src.error)
+  
+  function processOption() {
+    // process/run any option we've found
+    if (cmdOpt !== '') {
+      runOption(cmdOpt, cmdArgs, src)
+    }
+  }
 }
 
 function runOption (option, args, inpObj) {
