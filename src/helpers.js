@@ -46,31 +46,35 @@ function fsnipDo (cmdOpts, inputText) {
     plain: null
   }
 
-  // now we are going to parse through the options and arguments to extract individual options together with their arguments
-  var cmdOpt = '' // current option from the cmdOptsString list
-  var cmdArgs = [] // array containing any arguments for the cmdOpt
-  for (var i = 0; i < cmdOpts.length; i++) {
-    if (cmdOpts[i].substr(0, 2) === '--') { // this is a new option eg. --ellipsify
-      processOption()
-      cmdOpt = cmdOpts[i] // store the new option we have found
-      cmdArgs = [] // reset ready for any new arguments
-    } else {
-      // this must be an argument for the current option
-      if (cmdOpt === '') { // error if we don't currently have an option
-        src.error.push("invalid argument '" + cmdOpts[i] + "' passed without valid option to fsnip")
-      } else {
-        cmdArgs.push(cmdOpts[i])
-      }
-    }
-  }
-  processOption()
+  parseOptions()
   postProcess(src)
   return src.error.length === 0 ? src.text : chalk.redBright(src.error)
-  
-  function processOption() {
-    // process/run any option we've found
-    if (cmdOpt !== '') {
-      runOption(cmdOpt, cmdArgs, src)
+
+  function parseOptions () {
+    // now we are going to parse through the options and arguments to extract individual options together with their arguments
+    var cmdOpt = '' // current option from the cmdOptsString list
+    var cmdArgs = [] // array containing any arguments for the cmdOpt
+    for (var i = 0; i < cmdOpts.length; i++) {
+      if (cmdOpts[i].substr(0, 2) === '--') { // this is a new option eg. --ellipsify
+        processOption()
+        cmdOpt = cmdOpts[i] // store the new option we have found
+        cmdArgs = [] // reset ready for any new arguments
+      } else {
+        // this must be an argument for the current option
+        if (cmdOpt === '') { // error if we don't currently have an option
+          src.error.push("invalid argument '" + cmdOpts[i] + "' passed without valid option to fsnip")
+        } else {
+          cmdArgs.push(cmdOpts[i])
+        }
+      }
+    }
+    processOption()
+
+    function processOption () {
+      // process/run any option we've found
+      if (cmdOpt !== '') {
+        runOption(cmdOpt, cmdArgs, src)
+      }
     }
   }
 }
