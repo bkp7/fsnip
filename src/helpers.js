@@ -26,7 +26,7 @@ export function cli (args) {
       console.error(chalk.redBright("unable to read file '" + args[2] + "'"))
     }
     if (typeof txt !== 'undefined') {
-      console.log(fsnipDo(args.slice(3), txt))
+      console.info(fsnipDo(args.slice(3), txt))
     }
   } else { // we couldn't recognise the format on the command line
     console.error(chalk.redBright('Unrecognised arguments passed to fsnip. See fsnip --help'))
@@ -77,7 +77,7 @@ function runOption (option, args, inpObj) {
   // inpObj is an object containing the text, type and json object we need to modify
   // this function acts as a marsheller to identify options and process them accordingly
   let funcs = {
-    '--json': () => { json(inpObj, args) },
+    '--json': () => { json(inpObj) },
     '--prettify': () => { jsonPrettify(inpObj, args) },
     '--ellipsify': () => { jsonEllipsify(inpObj, args) },
     '--snip': () => { jsonSnippet(inpObj, args) },
@@ -158,7 +158,7 @@ function removeQuotes (str) {
 }
 
 // =================json===============================
-function json (inpObj, cmdArgs) {
+function json (inpObj) {
     // cmdArgs is an array of arguments
     // json is an object containing the json object we need to modify
   setInputType(inpObj, 'json') // all we do is flag our content as being json
