@@ -4,7 +4,8 @@
  const {exec} = require('child_process')
  const fs = require('fs')
  const path = require('path')
- const {minimizeJsonProperty, setInputType} = require('../dist/helpers.js')
+ const {minimizeJsonProperty} = require('../dist/jsonSnip.js')
+ const {setInputType} = require('../dist/commonFuncs.js')
 
  const tests = [
    {name: 'Simple 1', cmd: 'fsnip ./demo.json', resultFile: 'simple1.txt'},
