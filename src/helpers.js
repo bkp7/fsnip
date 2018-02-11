@@ -229,7 +229,7 @@ export function minimizeJsonProperty (json, property, excludes) { // only export
     }
   }
 
-  function delKeys(json, jsonPath, excludes) {
+  function delKeys (json, jsonPath, excludes) {
     var keys = Object.keys(jp.value(json, jsonPath))
     for (var j = 0; j < keys.length; j++) {
       if (excludes.indexOf(keys[j]) === -1) {
