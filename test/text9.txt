@@ -1,1 +1,1 @@
---to and --finish require their second argument to be numeric eg. '--from "some text" 2' with the optional second argument being the instance required
+--finish requires its second argument to be numeric eg. '--finish sometext 2' with the optional second argument being the instance required

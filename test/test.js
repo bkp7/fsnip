@@ -54,6 +54,8 @@
    {name: 'Text 14', cmd: 'fsnip ./demo.txt --start \'"#loc1_end"\' fred', resultFile: 'text14.txt'},
    {name: 'Text 15', cmd: 'fsnip ./demo.txt --start \'"#loc1_end"\' fred bert', resultFile: 'text15.txt'},
    {name: 'Text 16', cmd: 'fsnip ./demo.txt --start "this text"', resultFile: 'text16.txt'},
+   {name: 'Text 17', cmd: 'fsnip ./demo.txt --from \'"#loc1_end"\' fred', resultFile: 'text17.txt'},
+   {name: 'Text 18', cmd: 'fsnip ./demo.txt --to \'"#loc1_end"\' fred', resultFile: 'text18.txt'},
    {name: 'Help', cmd: 'fsnip --help', resultFile: 'help.txt'},
    {name: 'Tricky 1', cmd: 'fsnip ./test/tricky.json --ellipsify address ~housename', resultFile: 'tricky1.txt'},
    {name: 'Tricky 2', cmd: 'fsnip ./test/tricky.json --ellipsify address ~\'"street name"\'', resultFile: 'tricky2.txt'},

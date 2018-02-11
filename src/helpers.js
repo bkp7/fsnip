@@ -51,7 +51,7 @@ function fsnipDo (cmdOpts, inputText) {
   var cmdArgs = [] // array containing any arguments for the cmdOpt
   for (var i = 0; i < cmdOpts.length; i++) {
     if (cmdOpts[i].substr(0, 2) === '--') { // this is a new option eg. -jsonEllipsify
-      if (cmdOpt !== '') runOption(cmdOpt, cmdArgs, src) // process/run any previous Option we found
+      if (cmdOpt !== '') { runOption(cmdOpt, cmdArgs, src) } // process/run any previous Option we found
       cmdOpt = cmdOpts[i] // store the new option we have found
       cmdArgs = [] // reset ready for any new arguments
     } else {
@@ -62,7 +62,7 @@ function fsnipDo (cmdOpts, inputText) {
       cmdArgs.push(cmdOpts[i])
     }
   }
-  if (cmdOpt !== '') runOption(cmdOpt, cmdArgs, src) // process/run the very last Option we found
+  if (cmdOpt !== '') { runOption(cmdOpt, cmdArgs, src) } // process/run the very last Option we found
   postProcess(src)
   if (src.error.length === 0) {
     return src.text
@@ -76,26 +76,36 @@ function runOption (option, args, inpObj) {
   // arguments is an array of arguments for the option
   // inpObj is an object containing the text, type and json object we need to modify
   // this function acts as a marsheller to identify options and process them accordingly
-  if (option === '--json') {
-    json(inpObj, args)
-  } else if (option === '--prettify') {
-    jsonPrettify(inpObj, args)
-  } else if (option === '--ellipsify') {
-    jsonEllipsify(inpObj, args)
-  } else if (option === '--snip') {
-    jsonSnippet(inpObj, args)
-  } else if (option === '--delKeys') {
-    jsonDelKeys(inpObj, args)
-  } else if (option === '--from') {
-    textFrom(inpObj, args, false)
-  } else if (option === '--start') {
-    textFrom(inpObj, args, true)
-  } else if (option === '--to') {
-    textTo(inpObj, args, false)
-  } else if (option === '--finish') {
-    textTo(inpObj, args, true)
-  } else {
-    inpObj.error.push("invalid option '" + option + "' for fsnip")
+  switch (option) {
+    case '--json':
+      json(inpObj, args)
+      break
+    case '--prettify':
+      jsonPrettify(inpObj, args)
+      break
+    case '--ellipsify':
+      jsonEllipsify(inpObj, args)
+      break
+    case '--snip':
+      jsonSnippet(inpObj, args)
+      break
+    case '--delKeys':
+      jsonDelKeys(inpObj, args)
+      break
+    case '--from':
+      textFrom(inpObj, args, false)
+      break
+    case '--start':
+      textFrom(inpObj, args, true)
+      break
+    case '--to':
+      textTo(inpObj, args, false)
+      break
+    case '--finish':
+      textTo(inpObj, args, true)
+      break
+    default:
+      inpObj.error.push("invalid option '" + option + "' for fsnip")
   }
 }
 
@@ -313,37 +323,13 @@ function textFrom (inpObj, cmdArgs, inclusive) {
   // the format of the call is eg.
   // '--textFrom "some text" 2 - would start from the second instance of "some text"
   if (setInputType(inpObj, 'plain')) {
-    let occ
-    if (cmdArgs.length === 1) {
-      occ = 1 // by default we take from the first occurrence of this text
-    } else if (cmdArgs.length === 2) {
-      if ((cmdArgs[1] - 0) === (cmdArgs[1] - 0)) {
-        occ = (cmdArgs[1] - 0)
-        if (occ < 1) {
-          inpObj.error.push('--from and --start require their second argument to be a numeric values of at least 1 being the instance required')
-          return
-        }
+    let x = findLocation(inpObj, cmdArgs, inclusive ? '--start' : '--from')
+    if (x.found) {
+      if (inclusive === true) {
+        inpObj.plain = inpObj.plain.substr(x.loc)
       } else {
-        inpObj.error.push("--from and --start require their second argument to be numeric eg. '--from \"some text\" 2' with the optional second argument being the instance required")
-        return
+        inpObj.plain = inpObj.plain.substr(x.loc + x.len)
       }
-    } else {
-      inpObj.error.push("--from and --start require 1 or 2 arguments eg. '--from \"some text\"' with the optional second argument being the instance required.")
-      return
-    }
-    let x = -1
-    let arg = removeQuotes(cmdArgs[0])
-    for (let i = 0; i < occ; i++) {
-      x = inpObj.plain.indexOf(arg, x + 1)
-    }
-    if (x === -1) {
-      inpObj.error.push('unable to find occurrence ' + occ + ' of "' + arg + '"')
-      return
-    }
-    if (inclusive === true) {
-      inpObj.plain = inpObj.plain.substr(x)
-    } else {
-      inpObj.plain = inpObj.plain.substr(x + arg.length)
     }
   }
 }
@@ -355,37 +341,44 @@ function textTo (inpObj, cmdArgs, inclusive) {
   // the format of the call is eg.
   // '--textTo "some text" 2 - would go up to the second instance of "some text"
   if (setInputType(inpObj, 'plain')) {
-    let occ
-    if (cmdArgs.length === 1) {
-      occ = 1 // by default we take from the first occurrence of this text
-    } else if (cmdArgs.length === 2) {
-      if ((cmdArgs[1] - 0) === (cmdArgs[1] - 0)) {
-        occ = (cmdArgs[1] - 0)
-        if (occ < 1) {
-          inpObj.error.push('--to and --finish require their second argument to be a numeric values of at least 1 being the instance required')
-          return
-        }
+    let x = findLocation(inpObj, cmdArgs, inclusive ? '--finish' : '--to')
+    if (x.found) {
+      if (inclusive === true) {
+        inpObj.plain = inpObj.plain.substring(0, x.loc + x.len)
       } else {
-        inpObj.error.push("--to and --finish require their second argument to be numeric eg. '--from \"some text\" 2' with the optional second argument being the instance required")
-        return
+        inpObj.plain = inpObj.plain.substring(0, x.loc)
       }
-    } else {
-      inpObj.error.push("--to and --finish require 1 or 2 arguments eg. '--from \"some text\"' with the optional second argument being the instance required.")
-      return
-    }
-    let x = -1
-    let arg = removeQuotes(cmdArgs[0])
-    for (let i = 0; i < occ; i++) {
-      x = inpObj.plain.indexOf(arg, x + 1)
-    }
-    if (x === -1) {
-      inpObj.error.push('unable to find occurrence ' + occ + ' of "' + arg + '"')
-      return
-    }
-    if (inclusive === true) {
-      inpObj.plain = inpObj.plain.substring(0, x + arg.length)
-    } else {
-      inpObj.plain = inpObj.plain.substring(0, x)
     }
   }
+}
+
+function findLocation (inpObj, cmdArgs, errString) {
+  // find the location of the nth occurrence of the text specified in the command arguments
+  let occ
+  if (cmdArgs.length === 1) {
+    occ = 1 // by default we take from the first occurrence of this text
+  } else if (cmdArgs.length === 2) {
+    if ((cmdArgs[1] - 0) === (cmdArgs[1] - 0)) {
+      occ = (cmdArgs[1] - 0)
+      if (occ < 1) {
+        inpObj.error.push(errString + ' requires its second argument to be a numeric value of at least 1 being the instance required')
+        return {found: false}
+      }
+    } else {
+      inpObj.error.push(errString + " requires its second argument to be numeric eg. '" + errString + " sometext 2' with the optional second argument being the instance required")
+      return {found: false}
+    }
+  } else {
+    inpObj.error.push(errString + " requires 1 or 2 arguments eg. '" + errString + " sometext' with the optional second argument being the instance required.")
+    return {found: false}
+  }
+  let x = -1
+  let arg = removeQuotes(cmdArgs[0])
+  for (let i = 0; i < occ; i++) {
+    x = inpObj.plain.indexOf(arg, x + 1)
+  }
+  if (x === -1) {
+    inpObj.error.push('unable to find occurrence ' + occ + ' of "' + arg + '"')
+  }
+  return {found: (x !== -1), loc: x, len: arg.length}
 }
