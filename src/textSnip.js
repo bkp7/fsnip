@@ -31,22 +31,25 @@ export function textTo (inpObj, cmdArgs, inclusive) {
 function findLocation (inpObj, cmdArgs, errString) {
   // find the location of the nth occurrence of the text specified in the command arguments
   let occ
-  if (cmdArgs.length === 1) {
-    occ = 1 // by default we take from the first occurrence of this text
-  } else if (cmdArgs.length === 2) {
-    if ((cmdArgs[1] - 0) === (cmdArgs[1] - 0)) {
-      occ = (cmdArgs[1] - 0)
-      if (occ < 1) {
-        inpObj.error.push(errString + ' requires its second argument to be a numeric value of at least 1 being the instance required')
+  switch (cmdArgs.length) {
+    case 1:
+      occ = 1 // by default we take from the first occurrence of this text
+      break
+    case 2:
+      if ((cmdArgs[1] - 0) === (cmdArgs[1] - 0)) {
+        occ = (cmdArgs[1] - 0)
+        if (occ < 1) {
+          inpObj.error.push(errString + ' requires its second argument to be a numeric value of at least 1 being the instance required')
+          return {found: false}
+        }
+      } else {
+        inpObj.error.push(errString + " requires its second argument to be numeric eg. '" + errString + " sometext 2' with the optional second argument being the instance required")
         return {found: false}
       }
-    } else {
-      inpObj.error.push(errString + " requires its second argument to be numeric eg. '" + errString + " sometext 2' with the optional second argument being the instance required")
+      break
+    default:
+      inpObj.error.push(errString + " requires 1 or 2 arguments eg. '" + errString + " sometext' with the optional second argument being the instance required.")
       return {found: false}
-    }
-  } else {
-    inpObj.error.push(errString + " requires 1 or 2 arguments eg. '" + errString + " sometext' with the optional second argument being the instance required.")
-    return {found: false}
   }
   let x = -1
   let arg = removeQuotes(cmdArgs[0])
