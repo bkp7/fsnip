@@ -7,8 +7,3 @@ build:
     node: v8.9.4
 checks:
   javascript: true
-filter:
-  paths:
-    - "src/*"
-    - "dist/*"
-    - "test/*"
