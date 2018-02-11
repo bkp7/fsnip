@@ -8,6 +8,8 @@ build:
 checks:
   javascript: true
 filter:
+  paths:
+    - "src/"
+    - "test/"
   excluded_paths:
-    - test
-    - dist
+    - "dist/"

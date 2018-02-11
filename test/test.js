@@ -93,7 +93,7 @@
    for (let i = 0; i < tests.length; i++) {
      it(tests[i].name, function (done) {
        this.timeout(8000)
-       exec(tests[i].cmd, function (error, stdout, stderr) {
+       exec(tests[i].cmd, function (error, stdout) {
          assert.ifError(error)
          assert.equal(stdout.toString(), fs.readFileSync(path.resolve('./test/', tests[i].resultFile)).toString())
          done()
