@@ -11,14 +11,30 @@ const {runOption} = require('./runOptions.js')
 
 export function cli (args) {
   if (args.length === 3 && args[2] === '--help') {
-    console.info('fsnip is a tool for extracting json snippets from json files.\n\n' +
-                 'Usage:\n' + '' +
-                 'TODO still \n' +
-                 '  fsnip FILE [options [arguments]]    process the file and output the result to the console\n' +
-                 '  FILE         Specifies the file to process.\n' +
-                 '  --ellipsify  replaces the passed object with ellipses (...)\n' +
-                 '                 but excludes any keys which follow prepended by ~\n' +
-                 '                 eg. fsnip myfile.json --ellipsify $..address ~postcode')
+    console.info(chalk.cyan('  fsnip is a tool for extracting json or text snippets from files.\n\n') +
+                 '  Usage: ' + chalk.whiteBright('fsnip FILE [options [arguments]]\n') +
+                 '             ' + chalk.gray('process the file and output the result to the console\n\n') +
+                 '  FILE       ' + chalk.gray('specifies the file to process\n') +
+                 '  Options:\n' +
+                 '     --prettify [indent] [maxLength] [margins]\n' +
+      chalk.grey('             applies prettification to JSON\n') +
+                 '     --snip JSONPath\n' +
+      chalk.grey('             snips the key specified by JSONPath\n') +
+                 '     --ellipsify JSONPath [JSONPath] ... [~JSONPath] ...\n' +
+      chalk.grey('             replaces the passed json object, array or string with\n' +
+                 '             ellipses (...) but excludes any keys which follow\n' +
+                 '             prepended by ~\n' +
+                 '             eg. fsnip myfile.json --ellipsify $..address ~postcode\n') +
+                 '    --delKeys JSONPath [JSONPath] ...\n' +
+      chalk.grey('             deletes the keys following the option\n') +
+                 '    --from TEXT\n' +
+                 '    --to TEXT\n' +
+                 '    --start TEXT\n' +
+                 '    --finish TEXT\n' +
+      chalk.grey('             these options work on any plain file extracting the parts of the\n' +
+                 '             file after or up to the TEXT specified. --from and --to are\n' +
+                 '             exclusive, whereas --start and --finish are inclusive of the TEXT.')
+                 )
   } else if (args.length >= 3) {
     try {
       var txt = fs.readFileSync(args[2]).toString()
