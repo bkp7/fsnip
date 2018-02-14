@@ -1,6 +1,6 @@
 {
   "name": "fsnip",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "Command line utility to extract and modify text or json from a file",
   "main": "./dist/fsnip.js",
   "scripts": {
