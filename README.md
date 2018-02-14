@@ -19,6 +19,7 @@ Takes a single json file and processes it according to the options and arguments
 Located in the root of this package is a file `demo.json` which is used in all the JSON examples below.
 
 `fsnip ./demo.json` returns the file in full, unaltered
+
 [>]: # (mdpInsert ```json fsnip ./demo.json)
 ```json
 { "version": "1.0.0", "$source": "x.y.z",
@@ -37,6 +38,7 @@ Located in the root of this package is a file `demo.json` which is used in all t
 [<]: #
 
 `fsnip ./demo.json --prettify` applies prettification to return:
+
 [>]: # (mdpInsert ```json fsnip ./demo.json --prettify)
 ```json
 {
@@ -80,6 +82,7 @@ Located in the root of this package is a file `demo.json` which is used in all t
 [<]: #
 
 `fsnip ./demo.json --snip $..currentRadius` returns only the currentRadius object:
+
 [>]: # (mdpInsert ```json fsnip ./demo.json --snip $..currentRadius)
 ```json
 {
@@ -93,6 +96,7 @@ Located in the root of this package is a file `demo.json` which is used in all t
 [<]: #
 
 `fsnip ./demo.json --snip notifications --ellipsify gnss currentRadius ~method ~state ~message` extract the notifications object and then ellipsify (abbreviate) the gnss and currentRadius objects but not abreviating method, state or message:
+
 [>]: # (mdpInsert ```json fsnip ./demo.json --snip notifications --ellipsify gnss currentRadius ~method ~state ~message)
 ```json
 {
@@ -124,6 +128,7 @@ Located in the root of this package is a file `demo.json` which is used in all t
 [<]: #
 
 `fsnip ./demo.json --snip navigation --ellipsify gnss ~method ~state ~message --ellipsify currentRadius ~$source` will extract navigiation, ellipsify gnss (excluding method, state and message) and then will ellipsify currentRadius excluding source:
+
 [>]: # (mdpInsert ```json fsnip ./demo.json --snip navigation --ellipsify gnss ~method ~state ~message --ellipsify currentRadius ~$source)
 ```json
 {
@@ -144,6 +149,7 @@ Located in the root of this package is a file `demo.json` which is used in all t
 [<]: #
 
 `fsnip ./demo.json --ellipsify $ ~vessels --delKeys navigation --ellipsify uuid` will ellipsify the root but excluding vessels, will delete the navigation key and then ellipsify the uuid:
+
 [>]: # (mdpInsert ```json fsnip ./demo.json --ellipsify $ ~vessels --delKeys navigation --ellipsify uuid)
 ```json
 {
@@ -167,6 +173,7 @@ Located in the root of this package is a file `demo.json` which is used in all t
 [<]: #
 
 Text files can also be snipped. If our source file is:
+
 [>]: # (mdpInsert ``` fsnip ./demo.txt)
 ```
 An example text document to take snips from
@@ -183,12 +190,14 @@ This is the end of the example document
 [<]: #
 
 `fsnip ./demo.txt --from _start --to '"#loc1"'` gives:
+
 [>]: # (mdpInsert ``` fsnip ./demo.txt --from _start --to '"#loc1_end"')
 ```
 this text is within location 1
 ```
 [<]: #
 Whereas `fsnip ./demo.txt --start "'// startHere'" --finish "'// endHere'"` returns:
+
 [>]: # (mdpInsert ``` fsnip ./demo.txt --start "'// startHere'" --finish "'// endHere'")
 ```
 // startHere
