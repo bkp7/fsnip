@@ -4,8 +4,6 @@ A command line utility to extract and modify json from a file.
 
 [![Build Status](https://travis-ci.org/bkp7/fsnip.svg?branch=master)](https://travis-ci.org/bkp7/fsnip) [![Windows Tests](https://img.shields.io/appveyor/ci/bkp7/fsnip/master.svg?label=Windows%20build)](https://ci.appveyor.com/project/bkp7/fsnip) [![npm](https://img.shields.io/npm/v/npm.svg)](https://www.npmjs.com/package/@bkp7/fsnip) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/bkp7/fsnip/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/bkp7/fsnip/?branch=master) [![Coverage Status](https://coveralls.io/repos/github/bkp7/fsnip/badge.svg?branch=master)](https://coveralls.io/github/bkp7/fsnip?branch=master)
 
-## THIS UTILITY IS IN BETA PHASE TESTING
-
 ## Introduction
 
 Takes a single json file and processes it according to the options and arguments set returning a modified version of the json suitable for insertion into documents. This utility works well in conjunction with the mdprepare package to allow tested and verified schema compliant json file snippets to be inserted into documentation with the confidence that the documentation represents up to date versions of the json.
