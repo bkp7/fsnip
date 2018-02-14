@@ -199,8 +199,10 @@ Some example text
 
 ## Detailed Specifications
 
+**`fsnip`** can be passed any number of Options and associated arguments. They are processed left to right with each result being passed to the next argument. Options designed for JSON cannot be mixed with options designed for plain text files.
+
 ### Keys
-Keys can be identified using either plain text or XPath expressions. eg. `alarm` is equivalent to `$..alarm`. Dot or bracket notation is supported ie. `$.vessels.notifications.mob` is equivalent to `$['vessels'].['notifications'].['mob']`. Keys names which have spaces or start with $, -, or ! need to use the bracket notation. Other XPath notation including filter expressions, and nested expression are also supported, see [jsonpath](https://www.npmjs.com/package/jsonpath) for explanation of all valid pathExpressions.
+Keys can be identified using either plain text or JSONPath expressions. eg. `alarm` is equivalent to `$..alarm`. Dot or bracket notation is supported ie. `$.vessels.notifications.mob` is equivalent to `$['vessels'].['notifications'].['mob']`. Keys names which have spaces or start with $, -, or ! need to use the bracket notation. Other XPath notation including filter expressions, and nested expression are also supported, see [jsonpath](https://www.npmjs.com/package/jsonpath) for explanation of all valid pathExpressions.
 
 ### JSON Options
 
@@ -223,10 +225,17 @@ Looking at the Javascript stringify function:
 
 If `--prettify` is not present, but there are any changes made to json using other operators, the default prettify command will automatically be used.
 
+#### `--snip`
+
+The snip option cuts out a section from a JSON file.
+`--snip JSONPath
+
+The argument can be plain text or can use [JSONPath notation](https://www.npmjs.com/package/jsonpath). Thus `--snip myObject` is equivalent to `--snip $..myObject`.
+
 #### `--ellipsify`
 
 The ellipsify option will abreviate a json Object, Array or String and indicate this with ellipses `...`. It can be passed any number of arguments, being the Obeject(s), Array(s) and String(s) to be abbreviated along with those items to be left in prepended by `#`.
-`--ellipsify [JSONPath] [JSONPath] ... [~JSONPath] [~JSONPath] ...`
+`--ellipsify JSONPath [JSONPath] ... [~JSONPath] [~JSONPath] ...`
 
 Both types of arguments can be plain text or can use [JSONPath notation](https://www.npmjs.com/package/jsonpath). Thus `--ellipsify myObject` is equivalent to `ellipsify $..myObject`.
 
@@ -234,7 +243,7 @@ Both types of arguments can be plain text or can use [JSONPath notation](https:/
 
 The delKeys option will delete all keys which follow the option.
 
-`--delKeys [JSONPath] [JSONPath] ...
+`--delKeys JSONPath [JSONPath] ...
 
 It can be passed any number of keys for deletion using plain text of [JSONPath notation](https://www.npmjs.com/package/jsonpath).
 
