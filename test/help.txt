@@ -1,9 +1,25 @@
-fsnip is a tool for extracting json snippets from json files.
+  fsnip is a tool for extracting json or text snippets from files.
 
-Usage:
-TODO still 
-  fsnip FILE [options [arguments]]    process the file and output the result to the console
-  FILE         Specifies the file to process.
-  --ellipsify  replaces the passed object with ellipses (...)
-                 but excludes any keys which follow prepended by ~
-                 eg. fsnip myfile.json --ellipsify $..address ~postcode
+  Usage: fsnip FILE [options [arguments]]
+             process the file and output the result to the console
+
+  FILE       specifies the file to process
+  Options:
+     --prettify [indent] [maxLength] [margins]
+             applies prettification to JSON
+     --snip JSONPath
+             snips the key specified by JSONPath
+     --ellipsify JSONPath [JSONPath] ... [~JSONPath] ...
+             replaces the passed json object, array or string with
+             ellipses (...) but excludes any keys which follow
+             prepended by ~
+             eg. fsnip myfile.json --ellipsify $..address ~postcode
+    --delKeys JSONPath [JSONPath] ...
+             deletes the keys following the option
+    --from TEXT
+    --to TEXT
+    --start TEXT
+    --finish TEXT
+             these options work on any plain file extracting the parts of the
+             file after or up to the TEXT specified. --from and --to are
+             exclusive, whereas --start and --finish are inclusive of the TEXT.
