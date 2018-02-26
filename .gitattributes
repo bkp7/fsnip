@@ -8,3 +8,4 @@ package-lock.json eol=lf
 # Declare files which should be left alone
 test/*.txt binary
 demo.txt binary
+demo.json binary
