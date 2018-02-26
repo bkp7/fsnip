@@ -22,5 +22,6 @@ thumbs.db
 # CI stuff
 *.yml
 .babelrc
+.gitattributes
 .nyc_output
 coverage
