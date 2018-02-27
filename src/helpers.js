@@ -5,6 +5,7 @@ fsnip is a command line utility to extract and modify json from a file.
 
 */
 const fs = require('fs')
+const os = require('os')
 const stringify = require('json-stringify-pretty-compact')
 const chalk = require('chalk')
 const {runOption} = require('./runOptions.js')
@@ -80,7 +81,7 @@ function fsnipDo (cmdOpts, inputText) {
         if (cmdOpt === '') { // error if we don't currently have an option
           src.error.push("invalid argument '" + cmdOpts[i] + "' passed without valid option to fsnip")
         } else {
-          cmdArgs.push(cmdOpts[i])
+          cmdArgs.push(cleanCmdOpt(cmdOpts[i]))
         }
       }
     }
@@ -91,6 +92,17 @@ function fsnipDo (cmdOpts, inputText) {
       if (cmdOpt !== '') {
         runOption(cmdOpt, cmdArgs, src)
       }
+    }
+
+    function cleanCmdOpt (cmdOpt) {
+      // deals with any special characters dealt with for cross platform purposes
+      // in windows \$ is replaced with $ as $ is a special character which has to be delimited in posix
+      let r = cmdOpt
+      /* istanbul ignore if  */
+      if (os.platform() === 'win32') {
+        r = r.replace(/\\\$/g, '$')
+      }
+      return r
     }
   }
 }
