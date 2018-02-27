@@ -79,9 +79,9 @@ Located in the root of this package is a file `demo.json` which is used in all t
 ```
 [<]: #
 
-`fsnip ./demo.json --snip $..currentRadius` returns only the currentRadius object:
+`fsnip ./demo.json --snip "'$..currentRadius'"` returns only the currentRadius object:
 
-[>]: # (mdpInsert ```json fsnip ./demo.json --snip $..currentRadius)
+[>]: # (mdpInsert ```json fsnip ./demo.json --snip "'$..currentRadius'")
 ```json
 {
   "method": ["sound"],
@@ -125,9 +125,9 @@ Located in the root of this package is a file `demo.json` which is used in all t
 ```
 [<]: #
 
-`fsnip ./demo.json --snip navigation --ellipsify gnss ~method ~state ~message --ellipsify currentRadius ~$source` will extract navigiation, ellipsify gnss (excluding method, state and message) and then will ellipsify currentRadius excluding source:
+`fsnip ./demo.json --snip navigation --ellipsify gnss ~method ~state ~message --ellipsify currentRadius ~"'\$source'"` will extract navigiation, ellipsify gnss (excluding method, state and message) and then will ellipsify currentRadius excluding $source:
 
-[>]: # (mdpInsert ```json fsnip ./demo.json --snip navigation --ellipsify gnss ~method ~state ~message --ellipsify currentRadius ~$source)
+[>]: # (mdpInsert ```json fsnip ./demo.json --snip navigation --ellipsify gnss ~method ~state ~message --ellipsify currentRadius ~"'\$source'")
 ```json
 {
   "gnss": {
@@ -187,9 +187,9 @@ This is the end of the example document
 ```
 [<]: #
 
-`fsnip ./demo.txt --from _start --to '"#loc1"'` gives:
+`fsnip ./demo.txt --from _start --to "'#loc1'"` gives:
 
-[>]: # (mdpInsert ``` fsnip ./demo.txt --from _start --to '"#loc1_end"')
+[>]: # (mdpInsert ``` fsnip ./demo.txt --from _start --to "'#loc1_end'")
 ```
 this text is within location 1
 ```
@@ -270,9 +270,13 @@ These all indicate a place in the file where the snippet should begin and end. I
 
 **fsnip** was designed to be cross platform compatible.
 
-On the command line `"` and `'` are interpretted differently on posix and windows. For this tool we need the ability to pass arguments which include 'special' characters such as spaces, etc.
+On the command line `"` and `'` are interpretted differently on posix (bash) and windows. For this tool we need the ability to pass arguments which include 'special' characters such as spaces, etc.
 
 In addition, for options such as `--ellipsify` we can pass arguments meaning 'but not' which are indicated by a prepended `~`.
 
-So for example if you wish to exclude (but not) a json key called `"~my example"` you should use:
-`fsnip myfile.json $ ellipsify mykey ~'"~my example"'` ie using both single and double quotes, with the single quotes as outer and the tilde indicating exclude prepending the delimited text.
+So for example if you wish to exclude a json key called `"~my example"` you should use:
+`fsnip myfile.json $ ellipsify mykey ~"'~my example'"` ie using both single and double quotes, with the double quotes as outer and the tilde indicating exclude prepending the delimited text.
+
+This method should also be used when dealing with JSONPath eg. `fsnip myfile.json snip "'$['store']['book'][0]['title']'"`
+
+The `$` character has a special meaning on the posix command line. If you have a `$` character it needs to be escaped with a `\ ` in posix, and this also works in windows, eg. to snip a property named `"dollar$"`, use: `fsnip myfile.json snip "'dollar\$'"`.
