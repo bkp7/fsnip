@@ -36,7 +36,7 @@ function findLocation (inpObj, cmdArgs, errString) {
       occ = 1 // by default we take from the first occurrence of this text
       break
     case 2:
-      if ((cmdArgs[1] - 0) === (cmdArgs[1] - 0)) {
+      if (typeof (cmdArgs[1] - 0) === 'number' && !isNaN(cmdArgs[1] - 0)) {
         occ = (cmdArgs[1] - 0)
         if (occ < 1) {
           inpObj.error.push(errString + ' requires its second argument to be a numeric value of at least 1 being the instance required')
