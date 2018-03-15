@@ -11,8 +11,8 @@ function buildJsonSearchPath (keyName) {
 
 // =================json===============================
 export function json (inpObj) {
-    // cmdArgs is an array of arguments
-    // json is an object containing the json object we need to modify
+  // cmdArgs is an array of arguments
+  // json is an object containing the json object we need to modify
   setInputType(inpObj, 'json') // all we do is flag our content as being json
 }
 
@@ -29,8 +29,8 @@ export function jsonPrettify (inpObj, cmdArgs) {
     opts.indent = 2
     // overwrite with any values passed in
     if (cmdArgs !== undefined) {
-      if ((cmdArgs[0] - 0) === (cmdArgs[0] - 0)) { opts.indent = (cmdArgs[0] - 0) }
-      if ((cmdArgs[1] - 0) === (cmdArgs[1] - 0)) { opts.maxLength = (cmdArgs[1] - 0) }
+      if (typeof (cmdArgs[0] - 0) === 'number' && !isNaN(cmdArgs[0] - 0)) { opts.indent = (cmdArgs[0] - 0) }
+      if (typeof (cmdArgs[1] - 0) === 'number' && !isNaN(cmdArgs[1] - 0)) { opts.maxLength = (cmdArgs[1] - 0) }
       if (cmdArgs[1] === 'infinity') { opts.maxLength = 'infinity' }
       opts.margins = (cmdArgs[2] === 'true') // defaults to false if margins anything other than true
     }
@@ -107,7 +107,7 @@ export function jsonSnippet (inpObj, cmdArgs) {
     if (cmdArgs.length === 1) {
       occ = 1 // by default we snip the first occurrence of this property
     } else if (cmdArgs.length === 2) {
-      if ((cmdArgs[1] - 0) === (cmdArgs[1] - 0)) {
+      if (typeof (cmdArgs[1] - 0) === 'number' && !isNaN(cmdArgs[1] - 0)) {
         occ = (cmdArgs[1] - 0)
         if (occ < 1) {
           inpObj.error.push('--snip requires its second argument to be a numeric values of at least 1 being the instance required')

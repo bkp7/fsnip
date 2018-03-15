@@ -35,7 +35,7 @@ export function cli (args) {
       chalk.grey('             these options work on any plain file extracting the parts of the\n' +
                  '             file after or up to the TEXT specified. --from and --to are\n' +
                  '             exclusive, whereas --start and --finish are inclusive of the TEXT.')
-                 )
+    )
   } else if (args.length >= 3) {
     try {
       var txt = fs.readFileSync(args[2]).toString()
