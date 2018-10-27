@@ -1,4 +1,4 @@
-const {setInputType, removeQuotes} = require('./commonFuncs.js')
+const { setInputType, removeQuotes } = require('./commonFuncs.js')
 
 // ===================textFrom=================================
 export function textFrom (inpObj, cmdArgs, inclusive) {
@@ -40,16 +40,16 @@ function findLocation (inpObj, cmdArgs, errString) {
         occ = (cmdArgs[1] - 0)
         if (occ < 1) {
           inpObj.error.push(errString + ' requires its second argument to be a numeric value of at least 1 being the instance required')
-          return {found: false}
+          return { found: false }
         }
       } else {
         inpObj.error.push(errString + " requires its second argument to be numeric eg. '" + errString + " sometext 2' with the optional second argument being the instance required")
-        return {found: false}
+        return { found: false }
       }
       break
     default:
       inpObj.error.push(errString + " requires 1 or 2 arguments eg. '" + errString + " sometext' with the optional second argument being the instance required.")
-      return {found: false}
+      return { found: false }
   }
   let x = -1
   let arg = removeQuotes(cmdArgs[0])
@@ -59,5 +59,5 @@ function findLocation (inpObj, cmdArgs, errString) {
   if (x === -1) {
     inpObj.error.push('unable to find occurrence ' + occ + ' of "' + arg + '"')
   }
-  return {found: (x !== -1), loc: x, len: arg.length}
+  return { found: (x !== -1), loc: x, len: arg.length }
 }

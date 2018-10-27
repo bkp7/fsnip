@@ -1,5 +1,5 @@
-const {textFrom, textTo} = require('./textSnip.js')
-const {json, jsonPrettify, jsonEllipsify, jsonSnippet, jsonDelKeys} = require('./jsonSnip.js')
+const { textFrom, textTo } = require('./textSnip.js')
+const { json, jsonPrettify, jsonEllipsify, jsonSnippet, jsonDelKeys } = require('./jsonSnip.js')
 
 export function runOption (option, args, inpObj) {
   // option is a string eg. '-jsonEllipsify'
