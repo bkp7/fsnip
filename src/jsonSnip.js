@@ -1,5 +1,5 @@
 const jp = require('jsonpath')
-const {setInputType, removeQuotes} = require('./commonFuncs.js')
+const { setInputType, removeQuotes } = require('./commonFuncs.js')
 
 function buildJsonSearchPath (keyName) {
   if (keyName.substr(0, 1) === '$') {

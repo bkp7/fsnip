@@ -8,7 +8,7 @@ const fs = require('fs')
 const os = require('os')
 const stringify = require('json-stringify-pretty-compact')
 const chalk = require('chalk')
-const {runOption} = require('./runOptions.js')
+const { runOption } = require('./runOptions.js')
 
 export function cli (args) {
   if (args.length === 3 && args[2] === '--help') {

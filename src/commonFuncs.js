@@ -1,4 +1,4 @@
-const {jsonPrettify} = require('./jsonSnip.js')
+const { jsonPrettify } = require('./jsonSnip.js')
 
 export function setInputType (inpObj, newType) { // only exported for testing purposes
   if (typeof inpObj.type === 'undefined' || inpObj.type === '') { // type has not previously been set
