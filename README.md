@@ -241,7 +241,7 @@ The argument can be plain text or can use [JSONPath notation](https://www.npmjs.
 
 #### `--ellipsify`
 
-The ellipsify option will abreviate a json Object, Array or String and indicate this with ellipses `...`. It can be passed any number of arguments, being the Obeject(s), Array(s) and String(s) to be abbreviated along with those items to be left in prepended by `#`.
+The ellipsify option will abbreviate a json Object, Array or String and indicate this with ellipses `...`. It can be passed any number of arguments, being the Obeject(s), Array(s) and String(s) to be abbreviated along with those items to be left in prepended by `#`.
 `--ellipsify JSONPath [JSONPath] ... [~JSONPath] [~JSONPath] ...`
 
 Both types of arguments can be plain text or can use [JSONPath notation](https://www.npmjs.com/package/jsonpath). Thus `--ellipsify myObject` is equivalent to `ellipsify $..myObject`.
