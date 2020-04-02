@@ -41,7 +41,7 @@
     "instrument": false
   },
   "dependencies": {
-    "chalk": "^2.3.0",
+    "chalk": "^4.0.0",
     "json-stringify-pretty-compact": "^1.1.0",
     "jsonpath": "^1.0.0",
     "line-column": "^1.0.2",
